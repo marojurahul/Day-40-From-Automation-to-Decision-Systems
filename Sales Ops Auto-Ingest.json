@@ -1,0 +1,325 @@
+{
+  "name": "Sales Ops Auto-Ingest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2ac2d5ee-a274-4f4d-88ee-ac62f12f0b47",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1oC0UR-aFIycca_sYymQQqAIQMrAiuo3BHVhcmvPkgp8",
+          "mode": "list",
+          "cachedResultName": "Sales_Ops_Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oC0UR-aFIycca_sYymQQqAIQMrAiuo3BHVhcmvPkgp8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1031814428,
+          "mode": "list",
+          "cachedResultName": "Activities",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oC0UR-aFIycca_sYymQQqAIQMrAiuo3BHVhcmvPkgp8/edit#gid=1031814428"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "60befc18-bad0-4900-bcd7-fc519db3804f",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "AzZoZ0xlLq8q21Sf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "rep_activity",
+          "mode": "list",
+          "cachedResultName": "rep_activity"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "rep_id": "={{ $json.rep_id }}",
+            "calls": "={{ $json.calls }}",
+            "demos": "={{ $json.demos }}",
+            "follow_ups": "={{ $json.follow_ups }}",
+            "activity_date": "={{ $json.date }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "activity_date",
+              "displayName": "activity_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rep_id",
+              "displayName": "rep_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "calls",
+              "displayName": "calls",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "demos",
+              "displayName": "demos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_ups",
+              "displayName": "follow_ups",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        416,
+        0
+      ],
+      "id": "ba7914b8-06e1-478e-a22e-a4ad0890a940",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "9fJ9Zuc0EPE0bkD1",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A853HGUDA",
+          "mode": "list",
+          "cachedResultName": "sales-alerts"
+        },
+        "text": "=✅ Sales data ingested successfully! New activity for{{ $json.activity_date }}  loaded into PostgreSQL.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        640,
+        0
+      ],
+      "id": "390455c0-ad83-4ecf-9aaa-9c7a4abe94be",
+      "name": "Send a message",
+      "webhookId": "9ca0f264-a302-49dd-8eae-395ec48da96a",
+      "executeOnce": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "bopoUwsXHoVwmibE",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "listId": "6963b8ae8579976fa020a896",
+        "name": "=Jira {{ $json.key }} – Sales data ingestion",
+        "description": "=📅 Date: {{ $json.activity_date }} 📊 Calls: {{ $json.calls }} 🎯 Demos: {{ $json.demos }} 🔁 Follow-ups: {{ $json.follow_ups }}  Tracked via: Sheets → PostgreSQL → Jira → Trello → Slack",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        704,
+        832
+      ],
+      "id": "0b78514d-dcd2-4eb0-a2bd-e653732c1d73",
+      "name": "Create a card",
+      "executeOnce": true,
+      "credentials": {
+        "trelloApi": {
+          "id": "Itn8NOcwlr99qOyV",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "project": {
+          "__rl": true,
+          "value": "10001",
+          "mode": "list",
+          "cachedResultName": "My Team"
+        },
+        "issueType": {
+          "__rl": true,
+          "value": "10006",
+          "mode": "list",
+          "cachedResultName": "Task"
+        },
+        "summary": "=Sales data ingested – {{ $json.activity_date }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        416,
+        800
+      ],
+      "id": "09d3b23a-bc77-4a38-8993-9339aa0b3bc1",
+      "name": "Create an issue",
+      "executeOnce": true,
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "7C4deQkd1LqLSYms",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a card": {
+      "main": [
+        []
+      ]
+    },
+    "Create an issue": {
+      "main": [
+        [
+          {
+            "node": "Create a card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "4fa2a5ac-0064-41b3-8b23-1091f1f1fedc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e1bd7939f0576a92ebad35815686ae264223bc4c01d4a52de03ef6f1fdd66fbd"
+  },
+  "id": "tMJwP9M8KJPg309F",
+  "tags": []
+}
